@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import json
 
 class HHPageParser():
     def __init__(self):
@@ -9,21 +10,19 @@ class HHPageParser():
 
         self._d_result = dict()
         self._bs_page = bs_page
-        if self._bs_page == None:
+        if not self._bs_page:
             raise ValueError("Нет страницы для парсинга.")
 
-        self.get_vacancy_id()
-
-        self.get_publication_date()
-        if not self._d_result.get("datePosted"):
-           return None
-
-        self.get_vacancy_url()
-        self.get_region()
-        self.get_experience()
-        self.get_salary()
-        self.get_keyskills()
-        self.get_description()
+        if not self.is_archived():
+            self.get_title()
+            self.get_vacancy_id()
+            self.get_vacancy_url()
+            self.get_region()
+            self.get_experience()
+            self.get_salary()
+            self.get_keyskills()
+            self.get_description()
+            self.get_prof_specs()
 
         return self._d_result
 
@@ -32,13 +31,43 @@ class HHPageParser():
              Метод извлекает из страницы регион, где находится вакансия
              и записывает его в словарь результатов
         """
+        src = self._bs_page.find("script", attrs={"data-name":"HH/GoogleDfpService"})
+        vac_city = ""
+        if src:
+            dtext = src.get("data-params")
+            if dtext:
+                src: json = json.loads(dtext)
+                vac_city = src["vac_city"]
+        self._d_result["vac_city"] = vac_city
+
         for meta in self._bs_page.find_all("meta"):
-            if meta.get("itemprop") == "addressLocality":
-                self._d_result["city"] = meta["content"]
-            if meta.get("itemprop") == "addressRegion":
-                self._d_result["region"] = meta["content"]
-            if meta.get("itemprop") == "addressCountry":
-                self._d_result["country"] = meta["content"]
+                if meta.get("itemprop") == "addressLocality":
+                    self._d_result["city"] = meta["content"]
+                if meta.get("itemprop") == "addressRegion":
+                    self._d_result["region"] = meta["content"]
+                if meta.get("itemprop") == "addressCountry":
+                    self._d_result["country"] = meta["content"]
+
+    def is_archived(self):
+        for h2 in self._bs_page.find_all("h2"):
+            if h2.get("data-qa") == "bloko-header-2":
+                if h2.text == "Вакансия в архиве":
+                    return True
+        return False
+
+    def get_prof_specs(self):
+        """
+             Метод извлекает из страницы специальность и проф обл.
+             и записывает их в словарь результатов
+        """
+        src = self._bs_page.find("script", attrs={"data-name":"HH/GoogleDfpService"})
+        if src:
+            dtext = src.get("data-params")
+            if dtext:
+                src = json.loads(dtext)
+                self._d_result["specs"] = src["vac_specs"]
+                self._d_result["prof"] = src["vac_profarea"]
+
 
     def get_experience(self):
         s_experience = None
@@ -68,22 +97,15 @@ class HHPageParser():
                 l_skills.append(span.get("data-tag-id"))
         self._d_result["skills"] = l_skills
 
-    def get_publication_date(self):
-        for meta in self._bs_page("meta"):
-            if meta.get("itemprop") == "datePosted":
-                self._d_result["datePosted"] = meta["content"]
-                break
-
     def get_salary(self):
-        bs_found = self._bs_page.find("meta",attrs={"itemprop": "currency"})
-        if bs_found:
-            self._d_result["salary_currency"] = bs_found.get("content")
-        bs_found = self._bs_page.find("meta",attrs={"itemprop": "minValue"})
-        if bs_found:
-            self._d_result["min_salary"] = bs_found.get("content")
-        bs_found = self._bs_page.find("meta", attrs={"itemprop": "maxValue"})
-        if bs_found:
-            self._d_result["max_salary"] = bs_found.get("content")
+        src = self._bs_page.find("script", attrs={"data-name":"HH/GoogleDfpService"})
+        if src:
+            dtext = src.get("data-params")
+            if dtext:
+                src = json.loads(dtext)
+                self._d_result["min_salary"] = src["vac_salary_from"]
+                self._d_result["max_salary"] = src["vac_salary_to"]
+                self._d_result["salary_currency"] = src["vac_salary_cur"]
 
     def get_description(self):
         for div in self._bs_page.find_all("div"):
@@ -102,11 +124,8 @@ class HHPageParser():
             self._d_result["url"] = script.get("href")
             break
 
-if __name__ == "__main__":
-    # This code was used only for testing purposes
-    hhpage = HHPageParser()
-    f = open("Test/page.html",mode="r", encoding="utf-8")
-    bs_html = BeautifulSoup(f,"html.parser")
-    print(hhpage.parse(bs_html))
 
-
+    def get_title(self):
+        for h1 in self._bs_page.find_all("h1"):
+            if h1.get("data-qa") == "vacancy-title":
+                self._d_result["name"] = h1.text

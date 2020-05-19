@@ -1,12 +1,13 @@
-import hhweb_requester as hhw
-import hhsqlite_writer as hhsql
-import hhjson_writer as hhjson
+import urllib3
+from hhweb_requester_full import HHWebRequesterFull
+from hhpostgres_writer import HHPostgresWriter
+from hhjson_writer import HHJsonWriter
 import sys
 import configparser as cfg
 import json
-import urllib3
 import logging
 import logging.config
+from requests import get
 
 
 def main():
@@ -24,7 +25,7 @@ def main():
 
     # Читаем начальные параметры из конфигурационного файла
     s_url_with_request = config["Request"]["url"]
-    s_db_file = config["SQLite"]["path"]
+    s_db_string = config["PostgreSQL"]["db_string"]
     s_file_folder = config["Json"]["path"]
     f = open(config["Request"]["header"], "r")
     d_headers = json.load(f)
@@ -32,15 +33,19 @@ def main():
     logger.info("Configuration file has been read")
 
     # Создаем класс обработки запросов
-    o_web_requester = hhw.HHWebRequester(logger)
+    o_web_requester = HHWebRequesterFull(logger)
     o_web_requester.set_main_url(s_url_with_request)
     o_web_requester.set_headers(d_headers)
     logger.info("HHWebRequest class has been constructed")
 
+    # Получаем справочник регионов
+    o_json_ref_reg = get("https://api.hh.ru/areas", headers=d_headers, verify=False)
+    o_json_ref_reg = json.loads(o_json_ref_reg.content)
+
     # Создаем классы обработки записи результатов парсинга
-    o_sqlite = hhsql.HHSQLiteWriter(s_db_file, s_file_folder, logger)
-    o_json = hhjson.HHJsonWriter(s_file_folder, logger)
-    o_web_requester.add_writer(o_sqlite)
+    o_sql = HHPostgresWriter(s_db_string, s_file_folder, logger, o_json_ref_reg)
+    o_json = HHJsonWriter(s_file_folder, logger)
+    o_web_requester.add_writer(o_sql)
     o_web_requester.add_writer(o_json)
     logger.info("Classes that supports writing vacancy to different sources have been created.")
 
