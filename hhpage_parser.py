@@ -13,7 +13,7 @@ class HHPageParser():
         if not self._bs_page:
             raise ValueError("Нет страницы для парсинга.")
 
-        if not self.is_archived():
+        if self.is_valid():
             self.get_title()
             self.get_vacancy_id()
             self.get_vacancy_url()
@@ -48,12 +48,15 @@ class HHPageParser():
                 if meta.get("itemprop") == "addressCountry":
                     self._d_result["country"] = meta["content"]
 
-    def is_archived(self):
+    def is_valid(self):
         for h2 in self._bs_page.find_all("h2"):
             if h2.get("data-qa") == "bloko-header-2":
                 if h2.text == "Вакансия в архиве":
-                    return True
-        return False
+                    return False
+
+        if not self._bs_page.find("script", attrs={"data-name":"HH/GoogleDfpService"}):
+            return False
+        return True
 
     def get_prof_specs(self):
         """
@@ -75,20 +78,21 @@ class HHPageParser():
             if span.get("data-qa") == "vacancy-experience":
                 s_experience = span.text
                 break
-        if s_experience == "не требуется":
-            self._d_result["experience"] = "0"
-        elif s_experience.startswith("более"):
-            self._d_result["experience"] = s_experience.split(" ")[1]
-        elif s_experience.startswith("от"):
-            self._d_result["experience"] = s_experience.split(" ")[1]
-        else:
-            l_exp_split = s_experience.split(" ")
-            l_exp_split = l_exp_split[0].split("–")
+        if s_experience :
+            if s_experience == "не требуется":
+                self._d_result["experience"] = "0"
+            elif s_experience.startswith("более"):
+                self._d_result["experience"] = s_experience.split(" ")[1]
+            elif s_experience.startswith("от"):
+                self._d_result["experience"] = s_experience.split(" ")[1]
+            else:
+                l_exp_split = s_experience.split(" ")
+                l_exp_split = l_exp_split[0].split("–")
 
-            for s_exp in l_exp_split:
-                if s_exp.isdigit():
-                    self._d_result["experience"] = s_exp
-                    break
+                for s_exp in l_exp_split:
+                    if s_exp.isdigit():
+                        self._d_result["experience"] = s_exp
+                        break
 
     def get_keyskills(self):
         l_skills = []

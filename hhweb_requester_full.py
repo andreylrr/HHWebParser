@@ -37,7 +37,7 @@ class HHWebRequesterFull():
         l_urls = str.split(self._s_main_url,"/")
         self._s_main_url = "/".join(l_urls[:-1])
 
-        i_vacancy_number = 36956188
+        i_vacancy_number = 37103645 #36950000
         # Устанавливаем связь с БД
         # Цикл по получению всех страниц с сайта
         while True:

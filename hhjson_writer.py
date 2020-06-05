@@ -1,5 +1,6 @@
 import json
 from hhabstract import *
+import io as io
 
 """
     Класс HHJsonWrite позволяет сохранять данные, которые были получены
@@ -28,8 +29,8 @@ class HHJsonWriter(BaseWriter):
                 # Формируем имя файла
                 s_file_name = self._s_file_folder + "/" + "vacancy_" + data["vacancy_id"]
                 # Записываем результаты парсинга в файл
-                with open(s_file_name, 'w') as json_file:
-                    json.dump(data, json_file)
+                with io.open(s_file_name, 'w', encoding='utf-8') as json_file:
+                    json.dump(data, json_file, ensure_ascii=False)
                 return s_file_name
             except Exception as ex:
                 self._logger.error(f"Error during writing vacancy to json file\n{ex}")
