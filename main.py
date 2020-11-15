@@ -27,9 +27,8 @@ def main():
     s_url_with_request = config["Request"]["url"]
     s_db_string = config["PostgreSQL"]["db_string"]
     s_file_folder = config["Json"]["path"]
-    f = open(config["Request"]["header"], "r")
-    d_headers = json.load(f)
-    f.close()
+    with open(config["Request"]["header"], "r") as f:
+        d_headers = json.load(f)
     logger.info("Configuration file has been read")
 
     # Создаем класс обработки запросов
@@ -47,7 +46,7 @@ def main():
     o_json = HHJsonWriter(s_file_folder, logger)
     o_web_requester.add_writer(o_sql)
     o_web_requester.add_writer(o_json)
-    logger.info("Classes that supports writing vacancy to different sources have been created.")
+    logger.info("Classes that support writing vacancies to different outputs have been created.")
 
     # Запускаем обработку запроса
     logger.info("Request handling started")
