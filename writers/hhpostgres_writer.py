@@ -1,11 +1,9 @@
 # coding=utf-8
-from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from hhabstract import BaseWriter
+from sqlalchemy.orm import sessionmaker
+from writers.hhabstract import BaseWriter
 import sqlalchemy as db
 from postgres_model import Regions, Vacancies, Skills, ProfArea, ProfSpecs
 import datetime
-from sqlalchemy.orm.attributes import flag_modified
 
 
 class HHPostgresWriter(BaseWriter):

@@ -1,5 +1,5 @@
 import sqlite3 as sql
-from hhabstract import *
+from writers.hhabstract import *
 
 
 class HHSQLiteWriter(BaseWriter):

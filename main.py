@@ -1,7 +1,7 @@
 import urllib3
 from hhweb_requester_full import HHWebRequesterFull
-from hhpostgres_writer import HHPostgresWriter
-from hhjson_writer import HHJsonWriter
+from writers.hhpostgres_writer import HHPostgresWriter
+from writers.hhjson_writer import HHJsonWriter
 import sys
 import configparser as cfg
 import json

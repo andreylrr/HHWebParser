@@ -1,6 +1,6 @@
 import hhmain_parser as mp
 import hhpage_parser as pp
-from  hhabstract import *
+from writers.hhabstract import *
 import requests as rq
 from bs4 import BeautifulSoup
 
