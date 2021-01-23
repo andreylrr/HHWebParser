@@ -6,28 +6,29 @@ from bs4 import BeautifulSoup
 
 class HHWebRequester():
     def __init__(self, logger):
-        self._s_main_url = None
-        self._d_headers = None
-        self._l_writer = []
+        self._main_url = None
+        self._headers = None
+        self._writers = []
         self._logger = logger
 
     def set_main_url(self, url):
-        self._s_main_url = url
+        self._main_url = url
 
     def set_headers(self, headers):
-        self._d_headers = headers
+        self._headers = headers
 
     def add_writer(self, writer: BaseWriter):
-        self._l_writer.append(writer)
+        self._writers.append(writer)
 
     def process(self):
         """
              Метод обработки парсинга основной страницы поиска и
-             страницы вакансии
+             страницы вакансии. Вакансии для парсинга должны присутствовать на
+             странице поиска.
         :return:
         """
         # Проверяем наличие всех входных параметров, необходимых для парсинга
-        if self._s_main_url == None:
+        if self._main_url == None:
             self._logger.error(f"Url to the main page needs to be specified")
             raise ValueError("Необходимо установить url основного запроса")
 
@@ -41,7 +42,7 @@ class HHWebRequester():
         while True:
             try:
                 # Послать запрос на главный url
-                o_response = rq.get(self._s_main_url, headers=self._d_headers)
+                o_response = rq.get(self._main_url, headers=self._headers)
                 if o_response.status_code != 200 :
                     return o_response.status_code
             except Exception as ex:
@@ -57,7 +58,7 @@ class HHWebRequester():
                 i_vacancy_number += 1
                 try:
                     # Запрашиваем страницу вакансии
-                    o_page_response = rq.get(url[1], headers=self._d_headers, verify=False)
+                    o_page_response = rq.get(url[1], headers=self._headers, verify=False)
                 except Exception as ex:
                     self._logger.error(f"Error during handling request for vacancy page\n{ex}")
                     raise ex
@@ -71,7 +72,7 @@ class HHWebRequester():
                 if d_result:
                     d_result["name"] = url[0]
                     # Записываем результаты парсинга
-                    for writer in self._l_writer:
+                    for writer in self._writers:
                         writer.write(d_result)
 
                     yield i_vacancy_number, d_result["vacancy_id"], 1
@@ -81,7 +82,7 @@ class HHWebRequester():
             # Находим кнопку "Дальше" и посылаем запрос, если кнопки нет, то завершаем цикл
             self._bs_page_next = o_parsed.find("a", attrs = {"data-qa":"pager-next"})
             if self._bs_page_next:
-                self._s_main_url = self._d_headers['origin'] + self._bs_page_next["href"]
+                self._main_url = self._headers['origin'] + self._bs_page_next["href"]
                 continue
             else:
                 break
@@ -90,5 +91,5 @@ class HHWebRequester():
         """
             Метод очистки, должен запускаться перед удалением класса
         """
-        for writer in self._l_writer:
+        for writer in self._writers:
             writer.close()

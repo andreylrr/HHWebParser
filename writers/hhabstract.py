@@ -7,7 +7,7 @@ class BaseWriter(ABC):
         которые были получены в результате парсинга web страниц
     """
     @abstractmethod
-    def write(self, data):
+    async def write(self, data):
         print("Writing in Base class")
 
     @abstractmethod

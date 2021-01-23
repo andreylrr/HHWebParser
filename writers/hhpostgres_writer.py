@@ -27,7 +27,7 @@ class HHPostgresWriter(BaseWriter):
         Session.configure(bind=self._db_engine)
         self._session = Session()
 
-    def write(self, data):
+    async def write(self, data):
         """
             Метод записи результатов парсинга в БД
         :param url: данные полученные после парсинга страницы поиска

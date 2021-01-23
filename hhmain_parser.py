@@ -26,11 +26,11 @@ class HHMainParser():
         for link in bs_page.find_all("a"):
             if link.get("data-qa") == "vacancy-serp__vacancy-title":
                 # Найти url ссылку на вакансию
-                self._s_url = link.attrs["href"]
+                self._url = link.attrs["href"]
                 # Найти название вакансии
-                self._s_name = link.text
+                self._name = link.text
                 # Сохранить данные для возврата
-                l_data.append((self._s_name, self._s_url))
+                l_data.append((self._name, self._url))
 
         return l_data
 

@@ -17,7 +17,7 @@ class HHSQLiteWriter(BaseWriter):
             logger.error(f"Error during establishing connection to DB\n {ex}")
             raise ex
 
-    def write(self, data):
+    async def write(self, data):
         """
             Метод записи результатов парсинга в БД
         :param url: данные полученные после парсинга страницы поиска

@@ -16,7 +16,7 @@ class HHJsonWriter(BaseWriter):
         self._s_file_folder = file_folder
         self._logger = logger
 
-    def write(self, data):
+    async def write(self, data):
         """
              Метод записи результатов парсинга в файл json
         :param data: данные полученные из парсинга страницы вакансии
