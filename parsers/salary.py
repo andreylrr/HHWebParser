@@ -7,7 +7,7 @@ import json
 """
 
 
-class Experience(bp.BaseParser):
+class SalaryParser(bp.BaseParser):
     def parse(self, html_page, data_dict):
         src = html_page.find("script", attrs={"data-name":"HH/GoogleDfpService"})
         if src:

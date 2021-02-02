@@ -7,7 +7,7 @@ import json
 """
 
 
-class Region(bp.BaseParser):
+class RegionParser(bp.BaseParser):
     def parse(self, html_page, data_dict):
         src = html_page.find("script", attrs={"data-name": "HH/GoogleDfpService"})
         vac_city = ""

@@ -6,10 +6,9 @@ import parsers.basic_parser as bp
 """
 
 
-class KeySkills(bp.BaseParser):
+class KeySkillsParser(bp.BaseParser):
     def parse(self, html_page, data_dict):
         l_skills = []
-        for span in html_page.find_all("span"):
-            if span.get("data-qa") == "skills-element":
-                l_skills.append(span.get("data-tag-id"))
+        for div_element in html_page.find_all("div", attrs={"data-qa":"bloko-tag bloko-tag_inline skills-element"}):
+            l_skills.append(div_element.contents[0].text)
         data_dict["skills"] = l_skills

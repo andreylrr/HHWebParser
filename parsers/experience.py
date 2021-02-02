@@ -6,7 +6,7 @@ import parsers.basic_parser as bp
 """
 
 
-class Experience(bp.BaseParser):
+class ExperienceParser(bp.BaseParser):
     def parse(self, html_page, data_dict):
         s_experience = None
         for span in html_page.find_all("span"):

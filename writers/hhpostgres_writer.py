@@ -52,6 +52,10 @@ class HHPostgresWriter(BaseWriter):
             self._logger.error(f"Error during handling key skills\n{ex}")
             raise ex
 
+        # Проверяем наличие названия вакансии
+        if not data.get("name"):
+            raise ValueError(f"Missing title for vacancy {data.get('vacancy_id')}")
+
         mi_sal = data.get("min_salary").strip()
         mx_sal = data.get("max_salary").strip()
 
@@ -144,7 +148,7 @@ class HHPostgresWriter(BaseWriter):
         :return: списко ключевых навыков с их номерами
         """
         # Создаем лист с результатами
-        l_skills = []
+        _skills = []
 
         for skill in data["skills"]:
             skill_found = self._session.query(Skills).filter(Skills.name == skill).first()
@@ -152,9 +156,9 @@ class HHPostgresWriter(BaseWriter):
                 self._session.add(Skills(skill, datetime.datetime.now()))
                 self._session.commit()
                 skill_found = self._session.query(Skills).filter(Skills.name == skill).first()
-            l_skills.append(skill_found)
+            _skills.append(skill_found)
 
-        return l_skills
+        return _skills
 
     def check_file_name(self, data):
         """

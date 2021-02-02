@@ -6,7 +6,7 @@ import parsers.basic_parser as bp
 """
 
 
-class VacancyURL(bp.BaseParser):
+class VacancyURLParser(bp.BaseParser):
     def parse(self, html_page, data_dict):
         for script in html_page.find_all("link",attrs={"rel": "canonical"}):
             data_dict["url"] = script.get("href")

@@ -2,7 +2,7 @@
 class HHPageParser():
     def __init__(self):
         self._result = None
-        self._parsers = None
+        self._parsers = []
 
     def parse(self, bs_page):
         """
@@ -25,7 +25,7 @@ class HHPageParser():
         """
         Метод для добавления парсера
         """
-        self._parsers.add(parser)
+        self._parsers.append(parser)
 
     def is_valid(self, bs_page):
         """

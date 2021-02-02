@@ -5,7 +5,7 @@ import parsers.basic_parser as bp
 """
 
 
-class Description(bp.BaseParser):
+class DescriptionParser(bp.BaseParser):
     def parse(self, html_page, data_dict):
         for div in html_page.find_all("div"):
             if div.get("data-qa") == "vacancy-description":
